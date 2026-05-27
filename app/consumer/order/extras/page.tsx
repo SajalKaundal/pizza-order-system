@@ -1,3 +1,3 @@
 export default function Page() {
-  return <div>Sides Page</div>;
+  return <div> Extras Page</div>;
 }
