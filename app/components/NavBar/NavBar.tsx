@@ -15,7 +15,7 @@ export const NavBar = () => {
                     }
                 `}
       </style> */}
-      <nav className="bg-white px-6 md:px-16 lg:px-24 xl:px-32 py-4 flex items-center justify-between relative">
+      <nav className="bg-white px-6 md:px-16 lg:px-24 xl:px-32 py-2 flex items-center justify-between relative">
         <div className="flex items-center gap-10 ">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
@@ -117,13 +117,13 @@ export const NavBar = () => {
           <PickupSelector />
         </div>
         <div>
-          <button className="hidden md:flex bg-green-900 text-zinc-50 hover:text-zinc-200 text-l font-medium px-8 py-3 rounded-full cursor-pointer border-0 ">
+          <button className="hidden md:flex bg-green-900 text-zinc-50 hover:text-zinc-200 text-l font-medium px-8 py-2 rounded-full cursor-pointer border-0 ">
             Sign Up
           </button>
         </div>
 
         {menuOpen && (
-          <div className="absolute top-full left-0 w-1/4 h-160 bg-white border-t border-zinc-200 flex flex-col p-5 gap-1 z-50">
+          <div className="absolute top-full left-0 w-1/4 h-127 bg-white flex flex-col p-5 gap-1 z-50 shadow-lg ">
             <Link
               href="/auth/login"
               className="px-4 py-2.5 rounded-lg text-xl hover:bg-zinc-200"

@@ -100,8 +100,7 @@ export default function PickupSelector() {
     rounded-[26px]
     border
     border-[#dddddd]
-    bg-[#f7f7f7]
-    shadow-xl
+    shadow-sm
     overflow-visible
     `,
       )}
@@ -109,7 +108,7 @@ export default function PickupSelector() {
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full px-4 py-3 flex items-center justify-between"
+        className="w-full px-4 py-1 flex items-center justify-between"
       >
         {/* Left */}
         <div className="flex items-center gap-3">
@@ -127,7 +126,7 @@ export default function PickupSelector() {
             <p
               className={clsx(
                 "font-semibold text-[#222] leading-tight",
-                "text-[13px] max-w-42.5 truncate",
+                "text-[13px] max-w-35.5 truncate",
               )}
             >
               PJPB - 360° Business Park, Electronics City BLR
@@ -184,7 +183,7 @@ export default function PickupSelector() {
     left-0
     mt-2
     w-full
-    bg-[#f7f7f7]
+    bg-white
     rounded-[26px]
     border
     border-[#dddddd]
