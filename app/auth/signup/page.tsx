@@ -1,0 +1,134 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+
+export default function Page() {
+  const router = useRouter();
+
+  return (
+    <div className="min-h-screen flex justify-center bg-white p-6">
+      <div className="flex w-full lg:w-1/2 items-center justify-center px-6">
+        <form className="w-full max-w-md">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="mb-6 flex items-center gap-2 text-zinc-700 hover:text-zinc-900"
+          >
+            <ArrowLeft size={20} />
+            Back
+          </button>
+
+          <div className="mb-8 text-center">
+            <h2 className="text-4xl font-bold text-zinc-900">Create Account</h2>
+
+            <p className="mt-2 text-zinc-500">
+              Join Pizza and start ordering your favorite meals
+            </p>
+          </div>
+
+          {/* Google Signup */}
+          <button
+            type="button"
+            className="mb-6 flex h-12 w-full items-center justify-center gap-3 rounded-full border border-zinc-300 hover:bg-zinc-50"
+          >
+            <Image src="/google.svg" alt="Google" height={20} width={20} />
+            Continue with Google
+          </button>
+
+          {/* Divider */}
+          <div className="my-6 flex items-center gap-4">
+            <div className="h-px flex-1 bg-zinc-300" />
+            <span className="text-sm text-zinc-500">OR</span>
+            <div className="h-px flex-1 bg-zinc-300" />
+          </div>
+
+          {/* Full Name */}
+          <div className="mb-4">
+            <label className="mb-2 block text-sm font-medium">Full Name</label>
+
+            <input
+              type="text"
+              placeholder="Enter your full name"
+              className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-green-900"
+            />
+          </div>
+
+          {/* Email */}
+          <div className="mb-4">
+            <label className="mb-2 block text-sm font-medium">
+              Email Address
+            </label>
+
+            <input
+              type="email"
+              placeholder="Enter your email"
+              className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-green-900"
+            />
+          </div>
+
+          {/* Password */}
+          <div className="mb-4">
+            <label className="mb-2 block text-sm font-medium">Password</label>
+
+            <input
+              type="password"
+              placeholder="Create a password"
+              className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-green-900"
+            />
+          </div>
+
+          {/* Confirm Password */}
+          <div className="mb-6">
+            <label className="mb-2 block text-sm font-medium">
+              Confirm Password
+            </label>
+
+            <input
+              type="password"
+              placeholder="Confirm your password"
+              className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-green-900"
+            />
+          </div>
+
+          {/* Terms */}
+          <div className="mb-6 flex items-start gap-2 text-sm">
+            <input type="checkbox" className="mt-1" />
+
+            <p className="text-zinc-600">
+              I agree to the{" "}
+              <Link href="/terms" className="text-green-900 hover:underline">
+                Terms & Conditions
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" className="text-green-900 hover:underline">
+                Privacy Policy
+              </Link>
+            </p>
+          </div>
+
+          {/* Signup Button */}
+          <button
+            type="submit"
+            className="h-12 w-full rounded-full bg-green-900 font-medium text-white transition hover:bg-green-800"
+          >
+            Create Account
+          </button>
+
+          {/* Login Link */}
+          <p className="mt-6 text-center text-sm text-zinc-500">
+            Already have an account?{" "}
+            <Link
+              href="/auth/login"
+              className="font-medium text-green-900 hover:underline"
+            >
+              Log In
+            </Link>
+          </p>
+        </form>
+      </div>
+    </div>
+  );
+}

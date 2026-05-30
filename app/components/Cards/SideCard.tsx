@@ -1,5 +1,5 @@
-'use client'
-import {useState} from 'react'
+"use client";
+import { useState } from "react";
 import Image from "next/image";
 
 export default function SideCard({
@@ -16,11 +16,9 @@ export default function SideCard({
     isVeg: boolean;
   };
 }) {
-  const [size,setSize]= useState(item.variants[0].size)
+  const [size, setSize] = useState(item.variants[0].size);
   return (
-    <div
-      className="border border-zinc-200 hover:border-zinc-300 transition-colors rounded-xl p-2 flex flex-col w-80"
-    >
+    <div className="border border-zinc-200 hover:border-zinc-300 transition-colors rounded-xl p-2 flex flex-col w-80">
       {/* Top row: badge + bookmark */}
       <div className="flex items-center justify-end mb-2">
         {/* <span className="bg-lime-300 text-neutral-800 text-xs px-2 py-0.5 rounded-full">
@@ -54,9 +52,12 @@ export default function SideCard({
       </div>
 
       {/* Product Name */}
-      <p className="mb-2 px-2">
-        {item.name}<br/>
-        <span className="text-sm text-gray-500 overflow-hidden text-ellipsis">{item.description}</span>
+      <p className="mb-4 px-2">
+        {item.name}
+        <br />
+        <span className="block text-sm text-gray-500 overflow-hidden whitespace-nowrap text-ellipsis">
+          {item.description}
+        </span>
         <Image
           src={item.isVeg ? "/veg.png" : "/non-veg.png"}
           alt=""
@@ -75,10 +76,14 @@ export default function SideCard({
 
           <select
             className="w-full py-1 px-3 border border-gray-400 rounded-md bg-white text-sm focus:outline-none focus:border-blue-600
-      " onClick={(e)=>setSize(e.target.value)}
-          >{
-            item.variants.map((v,index)=> <option key={index} value={v.size}>{v.size}</option>)
-          }
+      "
+            onClick={(e) => setSize(e.target.value)}
+          >
+            {item.variants.map((v, index) => (
+              <option key={index} value={v.size}>
+                {v.size}
+              </option>
+            ))}
           </select>
         </div>
       </div>
@@ -86,7 +91,7 @@ export default function SideCard({
       {/* Price */}
       <div className="flex justify-between items-center gap-2 px-2">
         <span className="text-sm font-semibold text-neutral-800">
-          {item.variants.map((v)=>v.size===size?v.price:"")}
+          ₹{item.variants.map((v) => (v.size === size ? v.price : ""))}
         </span>
         <button className="px-4 py-2 bg-green-900 font-semibold text-white rounded-xl">
           Add To Cart

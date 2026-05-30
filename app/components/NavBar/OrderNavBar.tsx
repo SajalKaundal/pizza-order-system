@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 export default function OrderNavBar() {
   const pathname = usePathname();
   return (
-    <div className="flex  text-sm">
+    <div className="flex text-sm overflow-x-auto overflow-y-hidden pb-1 scrollbar-thin">
       <div className="flex items-center">
         <Link href={"pizzas"}>
           <label

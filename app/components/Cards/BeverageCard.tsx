@@ -1,4 +1,3 @@
-import { clsx } from "clsx";
 import Image from "next/image";
 
 export default function BeverageCard({
@@ -50,24 +49,24 @@ export default function BeverageCard({
       </div>
 
       {/* Product Name */}
-        <p className="mb-2 px-2">
-          {item.name}
-          <br />
-          <span className="text-sm text-gray-500 overflow-hidden text-ellipsis">
-            {item.description}
-          </span>
-          <Image
-            src={item.isVeg ? "/veg.png" : "/non-veg.png"}
-            alt=""
-            height={20}
-            width={20}
-          />
-        </p>
+      <p className="mb-4 px-2">
+        {item.name}
+        <br />
+        <span className="block text-sm text-gray-500 overflow-hidden whitespace-nowrap text-ellipsis">
+          {item.description}
+        </span>
+        <Image
+          src={item.isVeg ? "/veg.png" : "/non-veg.png"}
+          alt=""
+          height={20}
+          width={20}
+        />
+      </p>
 
       {/* Price */}
       <div className="flex justify-between items-center gap-2 px-2">
         <span className="text-sm font-semibold text-neutral-800">
-          {item.price}
+          ₹{item.variants[0].price}
         </span>
         <button className="px-4 py-2 bg-green-900 font-semibold text-white rounded-xl">
           Add To Cart

@@ -53,9 +53,12 @@ export default function PizzaCard({
       </div>
 
       {/* Product Name */}
-      <p className="mb-2 px-2">
-        {item.name}<br/>
-        <span className="text-sm text-gray-500 overflow-hidden text-ellipsis">{item.description}</span>
+      <p className="mb-4 px-2">
+        {item.name}
+        <br />
+        <span className="block text-sm text-gray-500 overflow-hidden whitespace-nowrap text-ellipsis">
+          {item.description}
+        </span>
         <Image
           src={item.isVeg ? "/veg.png" : "/non-veg.png"}
           alt=""
@@ -103,7 +106,7 @@ export default function PizzaCard({
       {/* Price */}
       <div className="flex justify-between items-center gap-2 px-2">
         <span className="text-sm font-semibold text-neutral-800">
-          {item.variants.map((v) => (v.size === size ? v.price : ""))}
+          ₹{item.variants.map((v) => (v.size === size ? v.price : ""))}
         </span>
         <button className="px-4 py-2 bg-green-900 font-semibold text-white rounded-xl">
           Add To Cart
