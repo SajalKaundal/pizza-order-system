@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function PizzaCard({
@@ -18,6 +19,7 @@ export default function PizzaCard({
   };
 }) {
   const [size, setSize] = useState("Small");
+  const router = useRouter()
   return (
     <div className="border border-zinc-200 hover:border-zinc-300 transition-colors rounded-xl p-2 flex flex-col w-80">
       {/* Top row: badge + bookmark */}
@@ -108,7 +110,7 @@ export default function PizzaCard({
         <span className="text-sm font-semibold text-neutral-800">
           ₹{item.variants.map((v) => (v.size === size ? v.price : ""))}
         </span>
-        <button className="px-4 py-2 bg-green-900 font-semibold text-white rounded-xl">
+        <button className="px-4 py-2 bg-green-900 font-semibold text-white rounded-xl" onClick={()=>router.push(`pizzas/${item.name}`)}>
           Add To Cart
         </button>
       </div>
