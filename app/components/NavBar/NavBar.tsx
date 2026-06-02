@@ -155,7 +155,7 @@ export const NavBar = () => {
 
             {/* Desktop Signup */}
             <Link
-              href="/auth/signup"
+              href="/signup"
               className="hidden md:flex rounded-full bg-green-900 px-8 py-2 font-medium text-white hover:bg-green-800"
             >
               Sign Up
@@ -177,7 +177,7 @@ export const NavBar = () => {
       >
         <div className="flex flex-col p-5">
           <Link
-            href="/auth/login"
+            href="/login"
             className="rounded-lg px-4 py-3 text-lg hover:bg-zinc-100"
           >
             Login

@@ -1,8 +1,12 @@
 "use client";
-import { useState } from "react";
-import Image from "next/image";
 
-export default function SideCard({
+import { useCart } from "@/app/consumer/context/cartcontext/CartContext";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+
+export default function PizzaCard({
   item,
 }: {
   item: {
@@ -16,86 +20,101 @@ export default function SideCard({
     isVeg: boolean;
   };
 }) {
-  const [size, setSize] = useState(item.variants[0].size);
+  const [size, setSize] = useState("Small");
+  const [price, setPrice] = useState<number>(item.variants[0].price);
+  const { dispatch, state } = useCart();
+  console.log(state);
   return (
-    <div className="border border-zinc-200 hover:border-zinc-300 transition-colors rounded-xl p-2 flex flex-col w-80">
-      {/* Top row: badge + bookmark */}
-      <div className="flex items-center justify-end mb-2">
-        {/* <span className="bg-lime-300 text-neutral-800 text-xs px-2 py-0.5 rounded-full">
-                <span className="font-bold">20%</span> off
-              </span> */}
-        <div className="size-7 rounded-full border border-zinc-300 flex items-center justify-center cursor-pointer">
-          <svg
-            width="9"
-            height="11"
-            viewBox="0 0 9 11"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M7.357.5c.303 0 .594.117.808.325s.335.491.335.786v8.334a.54.54 0 0 1-.076.277.584.584 0 0 1-.779.205L5.067 8.995a1.17 1.17 0 0 0-1.134 0l-2.578 1.432a.584.584 0 0 1-.779-.205.54.54 0 0 1-.076-.277V1.61c0-.295.12-.577.335-.786A1.16 1.16 0 0 1 1.643.5z"
-              stroke="#27272a"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      </div>
+    <div className="border border-zinc-200 hover:border-zinc-300 transition-colors rounded-xl flex flex-col w-full max-w-sm mx-auto bg-white">
+      {/* Top row */}
+      {/* <div className="flex items-center justify-end mb-3">
+    <div className="size-7 rounded-full border border-zinc-300 flex items-center justify-center cursor-pointer"> */}
+      {/* Bookmark SVG */}
+      {/* </div>
+  </div> */}
 
       {/* Product Image */}
-      <div className="flex items-center justify-center h-30 mb-2">
-        <img
-          src={item.image}
-          alt={item.name}
-          className="max-h-full max-w-full object-contain"
-        />
+      <div className="relative h-40 sm:h-44 md:h-48 overflow-hidden rounded-xl bg-gray-100 mb-4">
+        <Image src={item.image} alt={item.name} fill className="object-cover" />
       </div>
+      <div className="p-4">
+        {/* Product Name */}
+        <div className="flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="font-semibold text-lg text-gray-900">{item.name}</h3>
 
-      {/* Product Name */}
-      <p className="mb-4 px-2">
-        {item.name}
-        <br />
-        <span className="block text-sm text-gray-500 overflow-hidden whitespace-nowrap text-ellipsis">
-          {item.description}
-        </span>
-        <Image
-          src={item.isVeg ? "/veg.png" : "/non-veg.png"}
-          alt=""
-          height={20}
-          width={20}
-        />
-      </p>
+            <Image
+              src={item.isVeg ? "/veg.png" : "/non-veg.png"}
+              alt={item.isVeg ? "Veg" : "Non Veg"}
+              width={20}
+              height={20}
+            />
+          </div>
 
-      {/* Customization */}
-      <div className="flex gap-4 mb-3">
-        {/* Size Select */}
-        <div className="relative w-48">
-          <label className="absolute -top-2.5 left-3 bg-white px-1 text-xs text-gray-600 z-10">
-            Select Size
-          </label>
-
-          <select
-            className="w-full py-1 px-3 border border-gray-400 rounded-md bg-white text-sm focus:outline-none focus:border-blue-600
-      "
-            onClick={(e) => setSize(e.target.value)}
-          >
-            {item.variants.map((v, index) => (
-              <option key={index} value={v.size}>
-                {v.size}
-              </option>
-            ))}
-          </select>
+          <p className="mt-2 text-sm text-gray-500 line-clamp-2">
+            {item.description}
+          </p>
         </div>
-      </div>
 
-      {/* Price */}
-      <div className="flex justify-between items-center gap-2 px-2">
-        <span className="text-sm font-semibold text-neutral-800">
-          ₹{item.variants.map((v) => (v.size === size ? v.price : ""))}
-        </span>
-        <button className="px-4 py-2 bg-green-900 font-semibold text-white rounded-xl">
-          Add To Cart
-        </button>
+        {/* Selects */}
+        <div className="flex flex-col sm:flex-row gap-3 mt-4">
+          <div className="relative flex-1">
+            <label className="absolute -top-2.5 left-3 bg-white px-1 text-xs text-gray-600 z-10">
+              Select Size
+            </label>
+
+            <select
+              className="w-full py-2 px-3 border border-gray-300 rounded-md bg-white text-sm focus:outline-none focus:border-blue-600"
+              onChange={(e) => {
+                const selectedVariant = item.variants.find(
+                  (v) => v.size === e.target.value,
+                );
+
+                setSize(e.target.value);
+                setPrice(selectedVariant?.price || 0);
+              }}
+            >
+              {item.variants.map((v, index) => (
+                <option key={index} value={v.size}>
+                  {v.size}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="relative flex-1">
+            <label className="absolute -top-2.5 left-3 bg-white px-1 text-xs text-gray-600 z-10">
+              Select Crust
+            </label>
+
+            <select className="w-full py-2 px-3 border border-gray-300 rounded-md bg-white text-sm focus:outline-none focus:border-blue-600">
+              <option value="original">Original Crust</option>
+              <option value="thin">Thin N&apos; Crispy</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Bottom */}
+        <div className="flex items-center justify-between mt-5 pt-3 border-t border-gray-100">
+          <span className="text-lg font-bold text-neutral-900">₹{price}</span>
+
+          <button
+            className="px-4 py-2 bg-green-900 hover:bg-green-800 text-white rounded-lg font-medium transition-colors"
+            onClick={() =>
+              dispatch({
+                type: "ADD_TO_CART",
+                payload: {
+                  id: item.name,
+                  quantity: 1,
+                  price,
+                  name: item.name,
+                },
+              })
+            }
+          >
+            Add To Cart
+          </button>
+        </div>
       </div>
     </div>
   );

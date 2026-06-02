@@ -74,7 +74,7 @@ export default function Page() {
           <p className="mt-6 text-center text-sm text-zinc-500">
             Don&apos;t have an account?{" "}
             <Link
-              href="/auth/signup"
+              href="/signup"
               className="font-medium text-green-900 hover:underline"
             >
               Create Account
