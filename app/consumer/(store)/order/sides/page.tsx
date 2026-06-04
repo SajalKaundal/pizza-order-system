@@ -180,9 +180,9 @@ export default function Page() {
     },
   ];
   return (
-    <div className="h-139">
-      <section className="bg-white flex justify-center py-4">
-       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="min-h-full">
+      <section className="bg-white w-full py-6 px-4 md:px-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {sides.map((item, index) => (
             <SideCard key={index} item={item} />
           ))}
