@@ -4,14 +4,53 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { useActionState, useEffect } from "react";
+
+type ActionState = {
+  success: boolean;
+  message: string;
+};
 
 export default function Page() {
   const router = useRouter();
+  const signupAction = async (
+    previousState: ActionState,
+    formData: FormData,
+  ) => {
+    const signupData = Object.fromEntries(formData.entries());
+    const response = await fetch("http://localhost:3000/api/auth/signin", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(signupData),
+    });
+    const data = await response.json();
+    if (data.success) {
+      return {
+        success: true,
+        message: "Signup successful",
+      };
+    }
+    return {
+      success: false,
+      message: "Unable to create account",
+    };
+  };
+  const [state, formAction, pending] = useActionState(signupAction, {
+    success: false,
+    message: "",
+  });
 
+  useEffect(() => {
+    if (state.success) {
+      router.push("/login");
+    }
+  }, [state, router]);
   return (
     <div className="min-h-screen flex justify-center bg-white p-6">
       <div className="flex w-full lg:w-1/2 items-center justify-center px-6">
-        <form className="w-full max-w-md">
+        <form action={formAction} className="w-full max-w-md">
           <button
             type="button"
             onClick={() => router.back()}
@@ -51,6 +90,7 @@ export default function Page() {
 
             <input
               type="text"
+              name="name"
               placeholder="Enter your full name"
               className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-green-900"
             />
@@ -64,6 +104,7 @@ export default function Page() {
 
             <input
               type="email"
+              name="email"
               placeholder="Enter your email"
               className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-green-900"
             />
@@ -75,6 +116,7 @@ export default function Page() {
 
             <input
               type="password"
+              name="password"
               placeholder="Create a password"
               className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-green-900"
             />
