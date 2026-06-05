@@ -2,16 +2,21 @@
 
 import { NextResponse } from "next/server";
 import { signToken } from "@/lib/jwt";
-
+import { connectDB } from "@/db/db";
+import User from "@/db/models/user";
+import bcrypt from "bcrypt";
 export async function POST(req: Request) {
+  await connectDB();
   const body = await req.json();
 
   const { email, password } = body;
+  const user = await User.findOne({ email: email });
 
-  if (email === "admin@test.com") {
+  const match = await bcrypt.compare(password, user?.password || "");
+  if (match) {
     const token = signToken({
-      id: 1,
-      role: "ADMIN",
+      id: user?._id,
+      role: user?.role,
     });
 
     const response = NextResponse.json({
@@ -27,22 +32,7 @@ export async function POST(req: Request) {
 
     return response;
   }
-
-  const token = signToken({
-    id: 2,
-    role: "USER",
+  return NextResponse.json({
+    success: false,
   });
-
-  const response = NextResponse.json({
-    success: true,
-  });
-
-  response.cookies.set("token", token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "strict",
-    path: "/",
-  });
-
-  return response;
 }
