@@ -4,8 +4,12 @@ import React from "react";
 import Link from "next/link";
 import PickupSelector from "./PickupSelector";
 import clsx from "clsx";
+import { useAuth } from "@/app/(auth)/context/AuthContext";
+import { useRouter } from "next/navigation";
 export const NavBar = () => {
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const router = useRouter();
+  const { isAuthenticated, logout } = useAuth();
   return (
     <>
       {/* <style>
@@ -154,12 +158,21 @@ export const NavBar = () => {
             </button>
 
             {/* Desktop Signup */}
-            <Link
-              href="/signup"
-              className="hidden md:flex rounded-full bg-green-900 px-8 py-2 font-medium text-white hover:bg-green-800"
-            >
-              Sign Up
-            </Link>
+            {isAuthenticated ? (
+              <button
+                onClick={() => logout()}
+                className="hidden md:flex rounded-full bg-green-900 px-8 py-2 font-medium text-white hover:bg-green-800"
+              >
+                Log Out
+              </button>
+            ) : (
+              <button
+                onClick={() => router.push("/signup")}
+                className="hidden md:flex rounded-full bg-green-900 px-8 py-2 font-medium text-white hover:bg-green-800"
+              >
+                Sign Up
+              </button>
+            )}
           </div>
         </div>
       </nav>
@@ -176,19 +189,28 @@ export const NavBar = () => {
         )}
       >
         <div className="flex flex-col p-5">
-          <Link
-            href="/login"
-            className="rounded-lg px-4 py-3 text-lg hover:bg-zinc-100"
-          >
-            Login
-          </Link>
+          {isAuthenticated ? (
+            <button
+              onClick={() => logout()}
+              className="rounded-lg px-4 py-3 text-lg hover:bg-zinc-100"
+            >
+              Log Out
+            </button>
+          ) : (
+            <button
+              onClick={() => router.push("/login")}
+              className="rounded-lg px-4 py-3 text-lg hover:bg-zinc-100"
+            >
+              Login
+            </button>
+          )}
 
-          <Link
-            href="/help"
+          <button
+            onClick={() => router.push("/help")}
             className="rounded-lg px-4 py-3 text-lg hover:bg-zinc-100"
           >
             Help
-          </Link>
+          </button>
         </div>
       </div>
     </>

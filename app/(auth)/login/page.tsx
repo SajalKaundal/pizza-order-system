@@ -4,13 +4,53 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { useActionState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
+
+type ActionState = {
+  success: boolean;
+  message: string;
+};
 
 export default function Page() {
   const router = useRouter();
+  const loginAction = async (
+    previousState: ActionState,
+    formData: FormData,
+  ) => {
+    const loginData = Object.fromEntries(formData.entries());
+
+    const response = await fetch("http://localhost:3000/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(loginData),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      return { success: true, message: "Successfull login", user: data.user };
+    }
+    return { success: false, message: "unable to login" };
+  };
+
+  const [state, formAction, pending] = useActionState(loginAction, {
+    success: false,
+    message: "",
+  });
+  const { login } =  useAuth();
+  useEffect(() => {
+    if (state.success) {
+      router.push("/consumer");
+      login(state.user);
+    }
+  },[router,state]);
   return (
     <div className="min-h-screen flex justify-center bg-white">
       <div className="flex w-full lg:w-1/2 items-center justify-center px-6">
-        <form className="w-full max-w-md">
+        <form action={formAction} className="w-full max-w-md">
           <button
             onClick={() => router.back()}
             className="flex items-center gap-2 text-zinc-700 hover:text-zinc-900"
@@ -41,6 +81,7 @@ export default function Page() {
             </label>
 
             <input
+              name="email"
               type="email"
               placeholder="Enter your email"
               className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-green-900"
@@ -50,6 +91,7 @@ export default function Page() {
             <label className="mb-2 block text-sm font-medium">Password</label>
 
             <input
+              name="password"
               type="password"
               placeholder="Enter your password"
               className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-green-900"
@@ -68,7 +110,10 @@ export default function Page() {
               Forgot Password?
             </button>
           </div>
-          <button className="h-12 w-full rounded-full bg-green-900 font-medium text-white transition hover:bg-green-800">
+          <button
+            type="submit"
+            className="h-12 w-full rounded-full bg-green-900 font-medium text-white transition hover:bg-green-800"
+          >
             Log In
           </button>
           <p className="mt-6 text-center text-sm text-zinc-500">

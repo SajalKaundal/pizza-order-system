@@ -4,7 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import passwordValidator from "./(utils)/passwordValidator";
+import passwordMatching from "./(utils)/passwordMatching";
 
 type ActionState = {
   success: boolean;
@@ -13,6 +15,11 @@ type ActionState = {
 
 export default function Page() {
   const router = useRouter();
+
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const isPasswordValid = passwordValidator(password);
+  const isPasswordMatching = passwordMatching(password, confirmPassword);
   const signupAction = async (
     previousState: ActionState,
     formData: FormData,
@@ -47,6 +54,7 @@ export default function Page() {
       router.push("/login");
     }
   }, [state, router]);
+
   return (
     <div className="min-h-screen flex justify-center bg-white p-6">
       <div className="flex w-full lg:w-1/2 items-center justify-center px-6">
@@ -117,9 +125,26 @@ export default function Page() {
             <input
               type="password"
               name="password"
+              value={password}
               placeholder="Create a password"
               className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-green-900"
+              onChange={(e) => setPassword(e.target.value)}
             />
+            <span
+              className={`mt-2 block text-sm ${
+                password.length === 0
+                  ? "text-zinc-500"
+                  : isPasswordValid
+                    ? "text-green-600"
+                    : "text-red-500"
+              }`}
+            >
+              {password.length === 0
+                ? "Password must contain 8+ characters, uppercase, lowercase and special character."
+                : isPasswordValid
+                  ? "✓ Password meets all requirements"
+                  : "✗ Password does not meet the requirements"}
+            </span>
           </div>
 
           {/* Confirm Password */}
@@ -131,8 +156,27 @@ export default function Page() {
             <input
               type="password"
               placeholder="Confirm your password"
+              value={confirmPassword}
               className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-green-900"
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+              }}
             />
+            <span
+              className={`mt-2 block text-sm ${
+                confirmPassword.length === 0
+                  ? "text-zinc-500"
+                  : isPasswordMatching
+                    ? "text-green-600"
+                    : "text-red-500"
+              }`}
+            >
+              {confirmPassword.length === 0
+                ? "Please confirm your password"
+                : isPasswordMatching
+                  ? "✓ Passwords match"
+                  : "✗ Passwords do not match"}
+            </span>
           </div>
 
           {/* Terms */}
