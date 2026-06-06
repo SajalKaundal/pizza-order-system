@@ -6,6 +6,44 @@ import PickupSelector from "./PickupSelector";
 import clsx from "clsx";
 import { useAuth } from "@/app/(auth)/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { useCart } from "@/app/consumer/context/cartcontext/CartContext";
+
+/** Isolated client component so it can safely call useCart */
+function MobileCartButton() {
+  const router = useRouter();
+  const { state } = useCart();
+  const totalItems = state.reduce((sum, item) => sum + item.quantity, 0);
+
+  return (
+    <button
+      id="mobile-cart-btn"
+      onClick={() => router.push("/consumer/cart")}
+      className="relative flex lg:hidden items-center gap-2 rounded-full bg-green-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-800 active:scale-95"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="size-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M3 3h2l.4 2M7 13h10l4-8H5.4m1.6 8L5.4 5M7 13l-1.3 6h12.6L17 13M9 21a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z"
+        />
+      </svg>
+      Cart
+      {totalItems > 0 && (
+        <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white leading-none">
+          {totalItems > 99 ? "99+" : totalItems}
+        </span>
+      )}
+    </button>
+  );
+}
+
 export const NavBar = () => {
   const [menuOpen, setMenuOpen] = React.useState(false);
   const router = useRouter();
@@ -139,23 +177,7 @@ export const NavBar = () => {
           {/* Right */}
           <div className="flex items-center gap-3">
             {/* Cart visible on mobile + tablet */}
-            <button className="flex lg:hidden items-center gap-2 rounded-full bg-green-900 px-4 py-2 text-sm font-medium text-white">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="size-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4m1.6 8L5.4 5M7 13l-1.3 6h12.6L17 13M9 21a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z"
-                />
-              </svg>
-              Cart
-            </button>
+            <MobileCartButton />
 
             {/* Desktop Signup */}
             {isAuthenticated ? (

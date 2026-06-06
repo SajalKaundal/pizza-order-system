@@ -3,6 +3,7 @@
 import { useCart } from "@/app/consumer/context/cartcontext/CartContext";
 import { CartItem } from "@/app/consumer/context/cartcontext/CartProvider";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const categoryColors: Record<CartItem["category"], string> = {
   pizza: "bg-orange-100 text-orange-700",
@@ -22,6 +23,7 @@ const categoryLabel: Record<CartItem["category"], string> = {
 
 export default function Cart() {
   const { state, dispatch } = useCart();
+  const router = useRouter();
 
   const totalItems = state.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = state.reduce(
@@ -229,7 +231,11 @@ export default function Cart() {
             <span>₹{totalPrice + Math.round(totalPrice * 0.05)}</span>
           </div>
 
-          <button className="w-full py-3 rounded-xl bg-green-900 hover:bg-green-800 active:scale-[0.98] text-white font-semibold text-sm transition-all duration-150">
+          <button
+            id="cart-checkout-btn"
+            onClick={() => router.push("/consumer/checkout")}
+            className="w-full py-3 rounded-xl bg-green-900 hover:bg-green-800 active:scale-[0.98] text-white font-semibold text-sm transition-all duration-150"
+          >
             Proceed to Checkout →
           </button>
         </div>
