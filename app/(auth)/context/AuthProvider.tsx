@@ -104,7 +104,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const response = await fetch("/api/auth/me");
       const data = await response.json();
       if (data.success) {
-        login(data.user);
+        dispatch({ type: "LOGIN", payload: data.user });
       }
     };
     loadUser();
