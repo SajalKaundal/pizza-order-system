@@ -1,11 +1,11 @@
 import React, { createContext, useContext } from "react";
-import { AuthAction, User } from "./AuthProvider";
+import { AuthAction, LoginData, User } from "./AuthProvider";
 
 type AuthContextType = {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
-  login: (user: User) => void;
+  login: (loginData:LoginData) => Promise<boolean>;
   logout: () => void;
   dispatch: React.Dispatch<AuthAction>;
 };

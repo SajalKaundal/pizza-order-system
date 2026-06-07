@@ -1,7 +1,13 @@
 "use client";
 
-import { useReducer } from "react";
+import { useEffect, useReducer } from "react";
 import { AuthContext } from "./AuthContext";
+import { useRouter } from "next/navigation";
+
+export type LoginData = {
+  email: string;
+  password: string;
+};
 
 export type User = {
   _id: string;
@@ -57,20 +63,52 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
 }
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const router = useRouter();
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  const login = (user: User) => {
-    dispatch({
-      type: "LOGIN",
-      payload: user,
+  const login = async (loginData: LoginData) => {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(loginData),
     });
+    const data = await response.json();
+    if (data.success) {
+      dispatch({
+        type: "LOGIN",
+        payload: data.user,
+      });
+      if (data.user.role === "USER") {
+        router.push("/consumer");
+      } else if (data.user.role === "ADMIN") {
+        router.push("/admin");
+      }
+    }
+    return data.success;
   };
 
-  const logout = () => {
-    dispatch({
-      type: "LOGOUT",
+  const logout = async () => {
+    const response = await fetch("/api/auth/logout", {
+      method: "POST",
     });
+    const data = await response.json();
+    if (data.success) {
+      dispatch({
+        type: "LOGOUT",
+      });
+    }
   };
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const response = await fetch("/api/auth/me");
+      const data = await response.json();
+      if (data.success) {
+        login(data.user);
+      }
+    };
+    loadUser();
+  }, []);
 
   return (
     <AuthContext.Provider

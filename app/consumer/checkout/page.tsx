@@ -70,7 +70,7 @@ export default function CheckoutPage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Placed! 🎉</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Placed!</h1>
         <p className="text-gray-500 max-w-sm">
           Your pizza is being prepared. Sit tight — it&apos;ll be at your door soon!
         </p>
