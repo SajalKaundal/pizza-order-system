@@ -212,12 +212,20 @@ export const NavBar = () => {
       >
         <div className="flex flex-col p-5">
           {isAuthenticated ? (
+            <>
+            <button
+              onClick={() => router.push('/consumer/orders')}
+              className="rounded-lg px-4 py-3 text-lg hover:bg-zinc-100"
+              >
+              My Orders
+            </button>
             <button
               onClick={() => logout()}
               className="rounded-lg px-4 py-3 text-lg hover:bg-zinc-100"
             >
               Log Out
             </button>
+            </>
           ) : (
             <button
               onClick={() => router.push("/login")}

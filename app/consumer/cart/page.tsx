@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/app/(auth)/context/AuthContext";
 import { useCart } from "@/app/consumer/context/cartcontext/CartContext";
 import { CartItem } from "@/app/consumer/context/cartcontext/CartProvider";
 import Image from "next/image";
@@ -24,11 +25,16 @@ const categoryLabel: Record<CartItem["category"], string> = {
 export default function CartPage() {
   const { state, dispatch } = useCart();
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
 
   const totalItems = state.reduce((sum, item) => sum + item.quantity, 0);
-  const subtotal = state.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = state.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
+  const deliveryCharges = subtotal < 500 ? 50 : 0;
   const taxes = Math.round(subtotal * 0.05);
-  const total = subtotal + taxes;
+  const total = subtotal + deliveryCharges + taxes;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -49,7 +55,11 @@ export default function CartPage() {
               stroke="currentColor"
               strokeWidth={2}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
           <div className="flex-1">
@@ -114,14 +124,20 @@ export default function CartPage() {
                         stroke="currentColor"
                         strokeWidth={2}
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
                     </button>
                   </div>
 
                   {/* Badges */}
                   <div className="flex flex-wrap gap-1 mt-1.5">
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${categoryColors[item.category]}`}>
+                    <span
+                      className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${categoryColors[item.category]}`}
+                    >
                       {categoryLabel[item.category]}
                     </span>
                     {item.size && (
@@ -131,22 +147,30 @@ export default function CartPage() {
                     )}
                     {item.crust && (
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-semibold">
-                        {item.crust === "original" ? "Original" : "Thin & Crispy"}
+                        {item.crust === "original"
+                          ? "Original"
+                          : "Thin & Crispy"}
                       </span>
                     )}
                     <span
                       className={`text-[10px] px-2 py-0.5 rounded-full font-semibold flex items-center gap-0.5 ${
-                        item.isVeg ? "bg-green-50 text-green-700" : "bg-red-50 text-red-600"
+                        item.isVeg
+                          ? "bg-green-50 text-green-700"
+                          : "bg-red-50 text-red-600"
                       }`}
                     >
-                      <span className={`inline-block w-1.5 h-1.5 rounded-full ${item.isVeg ? "bg-green-600" : "bg-red-500"}`} />
+                      <span
+                        className={`inline-block w-1.5 h-1.5 rounded-full ${item.isVeg ? "bg-green-600" : "bg-red-500"}`}
+                      />
                       {item.isVeg ? "Veg" : "Non-Veg"}
                     </span>
                   </div>
 
                   {/* Price + Qty */}
                   <div className="flex items-center justify-between mt-2.5">
-                    <span className="font-bold text-gray-900">₹{item.price * item.quantity}</span>
+                    <span className="font-bold text-gray-900">
+                      ₹{item.price * item.quantity}
+                    </span>
                     <div className="flex items-center gap-1.5">
                       <button
                         onClick={() =>
@@ -208,9 +232,12 @@ export default function CartPage() {
                 />
               </svg>
             </div>
-            <h2 className="text-xl font-bold text-gray-800">Your cart is empty</h2>
+            <h2 className="text-xl font-bold text-gray-800">
+              Your cart is empty
+            </h2>
             <p className="text-sm text-gray-400 mt-2 max-w-xs">
-              Looks like you haven&apos;t added anything yet. Browse our menu and add your favourites!
+              Looks like you haven&apos;t added anything yet. Browse our menu
+              and add your favourites!
             </p>
             <button
               onClick={() => router.push("/consumer/order")}
@@ -229,12 +256,17 @@ export default function CartPage() {
             {/* Price breakdown */}
             <div className="space-y-1.5 mb-3">
               <div className="flex justify-between text-sm text-gray-500">
-                <span>Subtotal ({totalItems} {totalItems === 1 ? "item" : "items"})</span>
+                <span>
+                  Subtotal ({totalItems} {totalItems === 1 ? "item" : "items"})
+                </span>
                 <span>₹{subtotal}</span>
               </div>
               <div className="flex justify-between text-sm text-gray-500">
                 <span>Delivery fee</span>
-                <span className="text-green-700 font-semibold">FREE</span>
+                <span className="text-green-700 font-semibold">
+                  {" "}
+                  {deliveryCharges > 0 ? `₹${deliveryCharges}` : "FREE"}
+                </span>
               </div>
               <div className="flex justify-between text-sm text-gray-500">
                 <span>Taxes &amp; charges (5%)</span>
@@ -249,7 +281,14 @@ export default function CartPage() {
 
             <button
               id="cart-page-checkout-btn"
-              onClick={() => router.push("/consumer/checkout")}
+              onClick={() => {
+                console.log(isAuthenticated);
+                if (isAuthenticated) {
+                  router.push("/consumer/checkout");
+                } else {
+                  router.push("/login");
+                }
+              }}
               className="w-full py-3.5 rounded-xl bg-green-900 hover:bg-green-800 active:scale-[0.98] text-white font-bold text-base transition-all duration-150 shadow-lg shadow-green-900/20"
             >
               Proceed to Checkout →

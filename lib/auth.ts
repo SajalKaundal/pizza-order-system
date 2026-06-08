@@ -1,21 +1,21 @@
-import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
-type authPayload = {
-  id:string,
-  role:"USER"|"ADMIN"
-}
+import { verifyToken } from "./jwt";
+import User from "@/db/models/User";
+
 export async function verifyAuth() {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
 
   if (!token) {
-    throw new Error("Unauthorized");
+    return ;
   }
 
-  const decoded = jwt.verify(
-    token,
-    process.env.JWT_SECRET!
-  ) as authPayload;
-
-  return decoded;
+  const decoded = await verifyToken(token);
+  const user = await User.findById(decoded.id);
+  if (user) {
+    return {
+      id: user._id,
+      role: user.role,
+    };
+  }
 }

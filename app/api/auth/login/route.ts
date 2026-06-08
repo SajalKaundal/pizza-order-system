@@ -3,7 +3,7 @@
 import { NextResponse } from "next/server";
 import { signToken } from "@/lib/jwt";
 import { connectDB } from "@/db/db";
-import User from "@/db/models/user";
+import User from "@/db/models/User";
 import bcrypt from "bcrypt";
 export async function POST(req: Request) {
   await connectDB();
@@ -39,6 +39,6 @@ export async function POST(req: Request) {
     return response;
   }
   return NextResponse.json({
-    success: false
+    success: false,
   });
 }

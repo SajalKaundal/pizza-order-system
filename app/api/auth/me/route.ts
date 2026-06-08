@@ -1,5 +1,5 @@
 import { connectDB } from "@/db/db";
-import User from "@/db/models/user";
+import User from "@/db/models/User";
 import { verifyAuth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
