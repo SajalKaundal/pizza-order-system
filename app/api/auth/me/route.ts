@@ -8,6 +8,12 @@ export async function GET() {
     await connectDB();
     const token = await verifyAuth();
     // console.log(token);
+    if (!token) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 },
+      );
+    }
     const user = await User.findById(token.id);
     return NextResponse.json({
       success: true,

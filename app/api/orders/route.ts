@@ -7,12 +7,12 @@ export async function GET() {
   try {
     await connectDB();
     const orders = await Order.find();
-    NextResponse.json({
+    return NextResponse.json({
       success: true,
       orders,
     });
   } catch {
-    NextResponse.json({
+    return NextResponse.json({
       success: false,
     });
   }
@@ -44,7 +44,14 @@ export async function POST(req: NextRequest) {
       totalAmount,
     } = body;
 
+    const orderId = crypto
+      .randomUUID()
+      .replace(/-/g, "")
+      .slice(0, 8)
+      .toUpperCase();
+
     const order = new Order({
+      orderId,
       user: user.id,
       items,
       quantity,
@@ -60,6 +67,7 @@ export async function POST(req: NextRequest) {
       },
       paymentMethod,
     });
+
     await order.save();
 
     return NextResponse.json({

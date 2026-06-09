@@ -1,45 +1,378 @@
+"use client";
+
+import { useAuth } from "@/app/(auth)/context/AuthContext";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-export default function Page(){
- const boxIcon = "https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/e-commerce/boxIcon.svg"
+type OrderStatus = "PENDING" | "PREPARING" | "DELIVERED" | "CANCELLED";
 
-    const orders = [
-        { id: 1, items: [{ product: { name: "Nike Air Max 270" }, quantity: 1 }], address: { firstName: "John", lastName: "Doe", street: "123 Main St", city: "New York", state: "NY", zipcode: "10001", country: "USA"}, amount: 320.0, paymentType: "Credit Card", orderDate: "10/10/2022", isPaid: true },
-        { id: 1, items: [{ product: { name: "Nike Air Max 270" }, quantity: 1 }], address: { firstName: "John", lastName: "Doe", street: "123 Main St", city: "New York", state: "NY", zipcode: "10001", country: "USA"}, amount: 320.0, paymentType: "Credit Card", orderDate: "10/10/2022", isPaid: true },
-        { id: 1, items: [{ product: { name: "Nike Air Max 270" }, quantity: 1 }], address: { firstName: "John", lastName: "Doe", street: "123 Main St", city: "New York", state: "NY", zipcode: "10001", country: "USA"}, amount: 320.0, paymentType: "Credit Card", orderDate: "10/10/2022", isPaid: true },
-    ];
-    return (
-        <div className="md:p-10 p-4 space-y-4">
-            <h2 className="text-lg font-medium">Orders List</h2>
-            {orders.map((order, index) => (
-                <div key={index} className="flex flex-col md:grid md:grid-cols-[2fr_1fr_1fr_1fr] md:items-center gap-5 p-5 max-w-4xl rounded-md border border-gray-300 text-gray-800">
-                    <div className="flex gap-5">
-                        <Image width={48} height={48} className="object-cover opacity-60" src={boxIcon} alt="boxIcon" />
-                        <>
-                            {order.items.map((item, index) => (
-                                <div key={index} className="flex flex-col justify-center">
-                                    <p className="font-medium">
-                                        {item.product.name} <span className={`text-indigo-500 ${item.quantity < 2 && "hidden"}`}>x {item.quantity}</span>
-                                    </p>
-                                </div>
-                            ))}
-                        </>
-                    </div>
-
-                    <div className="text-sm">
-                        <p className='font-medium mb-1'>{order.address.firstName} {order.address.lastName}</p>
-                        <p>{order.address.street}, {order.address.city}, {order.address.state},{order.address.zipcode}, {order.address.country}</p>
-                    </div>
-
-                    <p className="font-medium text-base my-auto text-black/70">${order.amount}</p>
-
-                    <div className="flex flex-col text-sm">
-                        <p>Method: {order.paymentType}</p>
-                        <p>Date: {order.orderDate}</p>
-                        <p>Payment: {order.isPaid ? "Paid" : "Pending"}</p>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
+type Order = {
+  _id: string;
+  orderId:string;
+  user: string;
+  items: {
+    name: string;
+    price: number;
+    quantity: number;
+    size: string;
+    crust: string;
+    category: string;
+    image: string;
+    isVeg: boolean;
+  }[];
+  quantity: number;
+  totalAmount: number;
+  status: OrderStatus;
+  userInfo: {
+    name: string;
+    phone: string;
+    address: { line1: string; city: string; pincode: string };
+  };
+  paymentMethod: string;
+  createdAt: string;
+  updatedAt: string;
 };
+
+const STATUS_CONFIG = {
+  PENDING: {
+    label: "Pending",
+    bg: "bg-amber-50",
+    text: "text-amber-700",
+    dot: "bg-amber-400",
+  },
+  PREPARING: {
+    label: "Preparing",
+    bg: "bg-blue-50",
+    text: "text-blue-700",
+    dot: "bg-blue-400",
+  },
+  DELIVERED: {
+    label: "Delivered",
+    bg: "bg-green-50",
+    text: "text-green-700",
+    dot: "bg-green-500",
+  },
+  CANCELLED: {
+    label: "Cancelled",
+    bg: "bg-red-50",
+    text: "text-red-600",
+    dot: "bg-red-400",
+  },
+};
+
+const TABS: { label: string; value: "ALL" | OrderStatus }[] = [
+  { label: "All Orders", value: "ALL" },
+  { label: "Pending", value: "PENDING" },
+  { label: "Preparing", value: "PREPARING" },
+  { label: "Delivered", value: "DELIVERED" },
+  { label: "Cancelled", value: "CANCELLED" },
+];
+
+export default function OrdersPage() {
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<"ALL" | OrderStatus>("ALL");
+  const [orders, setOrders] = useState<Order[]>();
+
+  const filteredOrders =
+    activeTab === "ALL"
+      ? orders
+      : orders?.filter((o) => o.status === activeTab);
+
+  function formatDate(iso: string) {
+    return new Date(iso).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  }
+
+  function formatTime(iso: string) {
+    return new Date(iso).toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchOrder = async () => {
+      const response = await fetch(`/api/orders/${user?._id}`);
+      const data = await response.json();
+      if (data.success) {
+        setOrders(data.orders);
+      }
+    };
+    fetchOrder();
+  },[user?._id]);
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="sticky top-0 z-20 bg-white border-b border-gray-100 shadow-sm">
+        <div className="flex items-center gap-4 px-4 py-4 max-w-4xl mx-auto">
+          <button
+            id="orders-back-btn"
+            onClick={() => {
+              router.back();
+            }}
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+            aria-label="Go back"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="size-5 text-gray-700"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+          <div>
+            <h1 className="text-lg font-bold text-gray-900">My Orders</h1>
+            <p className="text-xs text-gray-400">
+              {orders?.length} orders placed
+            </p>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto px-4 py-6 space-y-5">
+        {/* Tab Filter */}
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {TABS.map((tab) => {
+            const count =
+              tab.value === "ALL"
+                ? orders?.length
+                : orders?.filter((o) => o.status === tab.value).length;
+            const isActive = activeTab === tab.value;
+            return (
+              <button
+                key={tab.value}
+                id={`tab-${tab.value.toLowerCase()}`}
+                onClick={() => setActiveTab(tab.value)}
+                className={`flex items-center gap-1.5 whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  isActive
+                    ? "bg-green-900 text-white shadow-md shadow-green-900/20"
+                    : "bg-white text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-gray-700"
+                }`}
+              >
+                {tab.label}
+                <span
+                  className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${
+                    isActive
+                      ? "bg-white/20 text-white"
+                      : "bg-gray-100 text-gray-500"
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Orders List */}
+        {filteredOrders?.length === 0 ? (
+          /* Empty State */
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center mb-5">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="size-12 text-gray-300"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z"
+                />
+              </svg>
+            </div>
+            <h2 className="text-lg font-bold text-gray-800">No orders yet</h2>
+            <p className="text-sm text-gray-400 mt-1 max-w-xs">
+              {activeTab === "ALL"
+                ? "You haven't placed any orders. Start exploring our menu!"
+                : `No ${STATUS_CONFIG[activeTab as OrderStatus]?.label.toLowerCase()} orders found.`}
+            </p>
+            <button
+              onClick={() => router.push("/consumer/order")}
+              className="mt-6 px-8 py-3 rounded-full bg-green-900 text-white font-semibold hover:bg-green-800 transition-colors text-sm"
+            >
+              Browse Menu
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {filteredOrders?.map((order) => {
+              const cfg = STATUS_CONFIG[order.status];
+              return (
+                <div
+                  key={order._id}
+                  className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden transition-shadow hover:shadow-md"
+                >
+                  {/* Order Header */}
+                  <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
+                    <div className="flex items-center gap-3">
+                      <div>
+                        <p className="text-sm font-bold text-gray-900">
+                          {order.orderId}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {formatDate(order.createdAt)} ·{" "}
+                          {formatTime(order.createdAt)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Status Badge */}
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${cfg.bg} ${cfg.text}`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                      {cfg.label}
+                    </span>
+                  </div>
+
+                  {/* Items */}
+                  <div className="px-5 py-4 space-y-3">
+                    {order.items.map((item, idx) => (
+                      <div key={idx} className="flex items-center gap-3">
+                        <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-gray-50 border border-gray-100">
+                          <Image
+                            src={item.image}
+                            alt={item.name}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-900 truncate">
+                            {item.name}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            {item.size} · {item.crust} Crust
+                            {item.quantity > 1 && (
+                              <span className="ml-1 text-green-700 font-medium">
+                                x{item.quantity}
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                        <p className="text-sm font-bold text-gray-900 shrink-0">
+                          ₹{item.price * item.quantity}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Footer: Address + Payment + Total */}
+                  <div className="px-5 py-4 border-t border-gray-50 grid sm:grid-cols-3 gap-4">
+                    {/* Delivery Address */}
+                    <div className="flex items-start gap-2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="size-4 text-gray-400 mt-0.5 shrink-0"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+                        />
+                      </svg>
+                      <div>
+                        <p className="text-xs font-semibold text-gray-500 mb-0.5">
+                          Delivery Address
+                        </p>
+                        <p className="text-xs text-gray-700 leading-relaxed">
+                          {order.userInfo.address.line1},{" "}
+                          {order.userInfo.address.city} –{" "}
+                          {order.userInfo.address.pincode}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Payment */}
+                    <div className="flex items-start gap-2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="size-4 text-gray-400 mt-0.5 shrink-0"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
+                        />
+                      </svg>
+                      <div>
+                        <p className="text-xs font-semibold text-gray-500 mb-0.5">
+                          Payment
+                        </p>
+                        <p className="text-xs text-gray-700">
+                          {order.paymentMethod}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {order.userInfo.phone}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Total */}
+                    <div className="flex items-start justify-between sm:justify-end sm:text-right gap-2">
+                      <div>
+                        <p className="text-xs font-semibold text-gray-500 mb-0.5">
+                          Order Total
+                        </p>
+                        <p className="text-xl font-bold text-gray-900">
+                          ₹{order.totalAmount}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {order.quantity}{" "}
+                          {order.quantity === 1 ? "item" : "items"} · incl.
+                          taxes
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Row */}
+                  {order.status !== "DELIVERED" &&
+                    order.status !== "CANCELLED" && (
+                      <div className="px-5 pb-4">
+                        <button className="w-full py-2.5 rounded-xl border-2 border-red-900 text-red-900 text-sm font-semibold hover:bg-red-900 hover:text-white transition-all duration-200">
+                          Cancel Order
+                        </button>
+                      </div>
+                    )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
