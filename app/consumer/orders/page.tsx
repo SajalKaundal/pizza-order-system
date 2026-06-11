@@ -4,12 +4,13 @@ import { useAuth } from "@/app/(auth)/context/AuthContext";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import OrderList from "./orderlist";
 
-type OrderStatus = "PENDING" | "PREPARING" | "DELIVERED" | "CANCELLED";
+export type OrderStatus = "PENDING" | "PREPARING" | "DELIVERED" | "CANCELLED";
 
-type Order = {
+export type Order = {
   _id: string;
-  orderId:string;
+  orderId: string;
   user: string;
   items: {
     name: string;
@@ -34,33 +35,6 @@ type Order = {
   updatedAt: string;
 };
 
-const STATUS_CONFIG = {
-  PENDING: {
-    label: "Pending",
-    bg: "bg-amber-50",
-    text: "text-amber-700",
-    dot: "bg-amber-400",
-  },
-  PREPARING: {
-    label: "Preparing",
-    bg: "bg-blue-50",
-    text: "text-blue-700",
-    dot: "bg-blue-400",
-  },
-  DELIVERED: {
-    label: "Delivered",
-    bg: "bg-green-50",
-    text: "text-green-700",
-    dot: "bg-green-500",
-  },
-  CANCELLED: {
-    label: "Cancelled",
-    bg: "bg-red-50",
-    text: "text-red-600",
-    dot: "bg-red-400",
-  },
-};
-
 const TABS: { label: string; value: "ALL" | OrderStatus }[] = [
   { label: "All Orders", value: "ALL" },
   { label: "Pending", value: "PENDING" },
@@ -72,40 +46,8 @@ const TABS: { label: string; value: "ALL" | OrderStatus }[] = [
 export default function OrdersPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"ALL" | OrderStatus>("ALL");
-  const [orders, setOrders] = useState<Order[]>();
-
-  const filteredOrders =
-    activeTab === "ALL"
-      ? orders
-      : orders?.filter((o) => o.status === activeTab);
-
-  function formatDate(iso: string) {
-    return new Date(iso).toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  }
-
-  function formatTime(iso: string) {
-    return new Date(iso).toLocaleTimeString("en-IN", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
 
   const { user } = useAuth();
-
-  useEffect(() => {
-    const fetchOrder = async () => {
-      const response = await fetch(`/api/orders/${user?._id}`);
-      const data = await response.json();
-      if (data.success) {
-        setOrders(data.orders);
-      }
-    };
-    fetchOrder();
-  },[user?._id]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -135,12 +77,12 @@ export default function OrdersPage() {
               />
             </svg>
           </button>
-          <div>
+          {/* <div>
             <h1 className="text-lg font-bold text-gray-900">My Orders</h1>
             <p className="text-xs text-gray-400">
               {orders?.length} orders placed
             </p>
-          </div>
+          </div> */}
         </div>
       </header>
 
@@ -150,8 +92,8 @@ export default function OrdersPage() {
           {TABS.map((tab) => {
             const count =
               tab.value === "ALL"
-                ? orders?.length
-                : orders?.filter((o) => o.status === tab.value).length;
+                // ? orders?.length
+                // : orders?.filter((o) => o.status === tab.value).length;
             const isActive = activeTab === tab.value;
             return (
               <button
@@ -180,198 +122,7 @@ export default function OrdersPage() {
         </div>
 
         {/* Orders List */}
-        {filteredOrders?.length === 0 ? (
-          /* Empty State */
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center mb-5">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="size-12 text-gray-300"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z"
-                />
-              </svg>
-            </div>
-            <h2 className="text-lg font-bold text-gray-800">No orders yet</h2>
-            <p className="text-sm text-gray-400 mt-1 max-w-xs">
-              {activeTab === "ALL"
-                ? "You haven't placed any orders. Start exploring our menu!"
-                : `No ${STATUS_CONFIG[activeTab as OrderStatus]?.label.toLowerCase()} orders found.`}
-            </p>
-            <button
-              onClick={() => router.push("/consumer/order")}
-              className="mt-6 px-8 py-3 rounded-full bg-green-900 text-white font-semibold hover:bg-green-800 transition-colors text-sm"
-            >
-              Browse Menu
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredOrders?.map((order) => {
-              const cfg = STATUS_CONFIG[order.status];
-              return (
-                <div
-                  key={order._id}
-                  className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden transition-shadow hover:shadow-md"
-                >
-                  {/* Order Header */}
-                  <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
-                    <div className="flex items-center gap-3">
-                      <div>
-                        <p className="text-sm font-bold text-gray-900">
-                          {order.orderId}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {formatDate(order.createdAt)} ·{" "}
-                          {formatTime(order.createdAt)}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Status Badge */}
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${cfg.bg} ${cfg.text}`}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-                      {cfg.label}
-                    </span>
-                  </div>
-
-                  {/* Items */}
-                  <div className="px-5 py-4 space-y-3">
-                    {order.items.map((item, idx) => (
-                      <div key={idx} className="flex items-center gap-3">
-                        <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-gray-50 border border-gray-100">
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-gray-900 truncate">
-                            {item.name}
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            {item.size} · {item.crust} Crust
-                            {item.quantity > 1 && (
-                              <span className="ml-1 text-green-700 font-medium">
-                                x{item.quantity}
-                              </span>
-                            )}
-                          </p>
-                        </div>
-                        <p className="text-sm font-bold text-gray-900 shrink-0">
-                          ₹{item.price * item.quantity}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Footer: Address + Payment + Total */}
-                  <div className="px-5 py-4 border-t border-gray-50 grid sm:grid-cols-3 gap-4">
-                    {/* Delivery Address */}
-                    <div className="flex items-start gap-2">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="size-4 text-gray-400 mt-0.5 shrink-0"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={1.5}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
-                        />
-                      </svg>
-                      <div>
-                        <p className="text-xs font-semibold text-gray-500 mb-0.5">
-                          Delivery Address
-                        </p>
-                        <p className="text-xs text-gray-700 leading-relaxed">
-                          {order.userInfo.address.line1},{" "}
-                          {order.userInfo.address.city} –{" "}
-                          {order.userInfo.address.pincode}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Payment */}
-                    <div className="flex items-start gap-2">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="size-4 text-gray-400 mt-0.5 shrink-0"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={1.5}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
-                        />
-                      </svg>
-                      <div>
-                        <p className="text-xs font-semibold text-gray-500 mb-0.5">
-                          Payment
-                        </p>
-                        <p className="text-xs text-gray-700">
-                          {order.paymentMethod}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {order.userInfo.phone}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Total */}
-                    <div className="flex items-start justify-between sm:justify-end sm:text-right gap-2">
-                      <div>
-                        <p className="text-xs font-semibold text-gray-500 mb-0.5">
-                          Order Total
-                        </p>
-                        <p className="text-xl font-bold text-gray-900">
-                          ₹{order.totalAmount}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {order.quantity}{" "}
-                          {order.quantity === 1 ? "item" : "items"} · incl.
-                          taxes
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Action Row */}
-                  {order.status !== "DELIVERED" &&
-                    order.status !== "CANCELLED" && (
-                      <div className="px-5 pb-4">
-                        <button className="w-full py-2.5 rounded-xl border-2 border-red-900 text-red-900 text-sm font-semibold hover:bg-red-900 hover:text-white transition-all duration-200">
-                          Cancel Order
-                        </button>
-                      </div>
-                    )}
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <OrderList userId={user?._id} activeTab={activeTab} />
       </main>
     </div>
   );
