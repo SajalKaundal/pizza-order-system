@@ -9,7 +9,6 @@ export default function EmptyOrder({
   activeTab: OrderStatus|"ALL";
 }) {
   const router = useRouter();
-  
   return (
     /* Empty State */
     <div className="flex flex-col items-center justify-center py-24 text-center">
